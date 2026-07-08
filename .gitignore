@@ -1,0 +1,10 @@
+.DS_Store
+dist/
+resources/*
+!resources/.gitkeep
+*.log
+*.dylib
+*.dll
+*.zip
+*.app/
+HsModBackups/
