@@ -45,7 +45,15 @@ x86_64 wrapper and Rosetta.
 
 ## Reinject app
 
-`HsMod Reinject.app` packages the repeatable part of the setup:
+The source repository does not bundle third-party binaries. The repeatable part
+of the setup is split into two paths:
+
+- `scripts/install_from_archives.sh` asks for HsMod source and BepInEx archives,
+  applies the patch, builds `HsMod.dll`, then installs everything.
+- `HsMod Reinject.app` can be built as a private local snapshot after resources
+  are already present on the machine.
+
+The private app packages:
 
 - copy the known-good HsMod/BepInEx resources,
 - recreate the wrapper,

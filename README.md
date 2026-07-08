@@ -6,7 +6,10 @@
 
 这个仓库不是 HsMod 官方项目，也不是 HsMod 的功能 fork。它记录并封装了一套在本机验证成功的 macOS 兼容方案：构建/准备可用的 HsMod/BepInEx 资源，然后通过一个已签名的 x86_64 launcher wrapper 让 Battle.net 仍然正常启动炉石，同时注入 BepInEx/HsMod。
 
-它还提供一个 `HsMod Reinject.app`：Battle.net 或炉石更新后，如果 `Hearthstone.app` 被修回原版，双击这个 app 就能把当前已验证可用的 HsMod/BepInEx 资源重新装回去。
+它还提供两种用法：
+
+- **从 HsMod 源码 zip 现场打补丁并安装**：不需要仓库自带第三方二进制。
+- **构建本机私用的 `HsMod Reinject.app`**：把你本机已经准备好的资源打进一个私用 app，方便炉石更新后重复重注入。
 
 上游项目：
 
@@ -51,6 +54,25 @@ macOS 启动/注入链路做了这些处理：
 
 也就是说：没有修改 HsMod 的卡牌/皮肤/功能逻辑；改的是让它能在这个 macOS 启动环境里编译、加载、登录和保持 Web UI 可访问的兼容层。
 
+## 正确的资源模型
+
+这个 GitHub 仓库**不提交** HsMod、BepInEx、Doorstop 或 Hearthstone 的二进制。
+
+公开仓库里放的是：
+
+- HsMod macOS 兼容补丁：`patches/hsmod-macos-compat.patch`
+- 用补丁构建 HsMod.dll 的脚本：`scripts/build_patched_hsmod.sh`
+- 从 HsMod/BepInEx 压缩包现场安装的脚本：`scripts/install_from_archives.sh`
+- macOS launcher wrapper 源码：`src/HsModLauncher.c`
+- 重注入/恢复脚本
+
+也就是说，app 不应该“凭空自带”这些第三方资源。你需要提供：
+
+- HsMod 源码 zip，例如 `HsMod-bepinex5.zip`
+- BepInEx macOS universal zip，例如 `BepInEx_macos_universal_5.4.23.5.zip`
+
+脚本会在本机把 HsMod 打补丁并编译成 `HsMod.dll`，再把 BepInEx/Doorstop 和 corlib 安装到炉石目录。
+
 ## 已验证环境
 
 - macOS 27.0 beta
@@ -61,15 +83,35 @@ macOS 启动/注入链路做了这些处理：
 
 其他版本不保证一定可用。
 
-## 已安装用户怎么用
+## 推荐用法：从压缩包现场安装
 
-如果你已经拿到了构建好的 `HsMod Reinject.app`：
+准备：
 
-1. 退出炉石。
-2. 双击 `HsMod Reinject.app`。
-3. 等提示“注入完成”。
-4. 回到 Battle.net，点“进入游戏”。
-5. 打开 `http://127.0.0.1:58744/pack` 查看 HsMod 页面。
+- HsMod 源码 zip
+- BepInEx macOS universal zip
+- 已安装的 macOS 炉石，默认路径 `/Applications/Hearthstone/Hearthstone.app`
+
+运行：
+
+```sh
+./scripts/install_from_archives.sh
+```
+
+如果不传环境变量，脚本会弹出文件选择框，让你选择 HsMod zip 和 BepInEx zip。
+
+也可以显式指定：
+
+```sh
+HSMOD_SOURCE=/path/to/HsMod-bepinex5.zip \
+BEPINEX_ZIP=/path/to/BepInEx_macos_universal_5.4.23.5.zip \
+./scripts/install_from_archives.sh
+```
+
+完成后：
+
+1. 回到 Battle.net。
+2. 点“进入游戏”。
+3. 打开 `http://127.0.0.1:58744/pack` 查看 HsMod 页面。
 
 日志位置：
 
@@ -77,11 +119,29 @@ macOS 启动/注入链路做了这些处理：
 ~/Library/Logs/HsModReinject.log
 ```
 
-如果炉石更新后 HsMod 失效，重复上面流程即可。
+如果炉石更新后 HsMod 失效，重新运行 `install_from_archives.sh`，或者使用下面的私用重注入 app。
 
-## 从当前已安装环境构建 app
+## 只构建 patched HsMod.dll
 
-这个仓库默认不提交第三方二进制。构建脚本会从你本机当前炉石安装目录里复制这些资源：
+如果你只想把 HsMod 源码打补丁并编译出 DLL：
+
+```sh
+./scripts/build_patched_hsmod.sh /path/to/HsMod-bepinex5.zip dist/HsMod.dll
+```
+
+源码目录也可以：
+
+```sh
+./scripts/build_patched_hsmod.sh /path/to/HsMod-bepinex5 dist/HsMod.dll
+```
+
+## 可选：构建本机私用重注入 app
+
+如果你已经完成过一次安装，并且本机 `/Applications/Hearthstone` 里已有可用资源，可以构建一个**本机私用**的 `HsMod Reinject.app`。
+
+这个 app 会把你本机当前资源打包进去，方便炉石更新后快速重注入。它适合自己用，不建议直接作为公开 release 分发，因为里面会包含第三方二进制。
+
+构建脚本会从当前炉石安装目录复制这些资源：
 
 - `/Applications/Hearthstone/BepInEx/plugins/HsMod.dll`
 - `/Applications/Hearthstone/libdoorstop.dylib`

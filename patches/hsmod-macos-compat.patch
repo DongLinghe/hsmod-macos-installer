@@ -1,0 +1,97 @@
+--- a/HsMod/HsMod.csproj	2026-07-07 11:28:58
++++ b/HsMod/HsMod.csproj	2026-07-08 15:31:51
+@@ -183,10 +183,6 @@
+     </Reference>
+     <Reference Include="Polly">
+       <HintPath>LibHearthstone\Polly.dll</HintPath>
+-    </Reference>
+-    <Reference Include="QRCoderUnity, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+-      <SpecificVersion>False</SpecificVersion>
+-      <HintPath>LibHearthstone\QRCoderUnity.dll</HintPath>
+     </Reference>
+     <Reference Include="System" />
+     <Reference Include="System.Configuration">
+@@ -441,10 +437,14 @@
+   </ItemGroup>
+   <ItemGroup>
+     <EmbeddedResource Include="WebResources\config.html" />
++  </ItemGroup>
++  <ItemGroup>
++    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" PrivateAssets="All" />
+   </ItemGroup>
+   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+   <PropertyGroup>
+-    <PostBuildEvent>$(ProjectDir)\install.bat</PostBuildEvent>
++    <PostBuildEvent>
++    </PostBuildEvent>
+   </PropertyGroup>
+   <PropertyGroup>
+     <PreBuildEvent>
+@@ -457,4 +457,4 @@
+     <Target Name="AfterBuild">
+     </Target>
+     -->
+-</Project>
+\ No newline at end of file
++</Project>
+--- a/HsMod/WebPage.cs	2026-07-07 11:28:58
++++ b/HsMod/WebPage.cs	2026-07-08 15:31:51
+@@ -32,7 +32,7 @@
+             if (title != "index")
+             {
+                 nav = "<center><ul class=\"nav_ui\">";
+-                var btns = GenerateBtn().Replace("<br/>", "").Split("<br />");
++                var btns = GenerateBtn().Replace("<br/>", "").Split(new[] { "<br />" }, StringSplitOptions.None);
+                 foreach (string btn in btns)
+                 {
+                     nav += $@"<li class=""nav_li"">{btn}</li>";
+--- a/HsMod/Patcher.cs	2026-07-07 11:28:58
++++ b/HsMod/Patcher.cs	2026-07-08 15:31:51
+@@ -1793,11 +1793,11 @@
+                         if (pair.Value == 1)
+                         {
+                             // 9 新版随从的异画样式
+-                            result.TryAdd(pair.Key, 9);
++                            result[pair.Key] = 9;
+                         }
+                         else
+                         {
+-                            result.TryAdd(pair.Key, pair.Value);
++                            result[pair.Key] = pair.Value;
+                         }
+                     }
+                 }
+@@ -3849,4 +3849,3 @@
+     }
+ 
+ }
+-
+--- a/HsMod/WebServer.cs	2026-07-07 11:28:58
++++ b/HsMod/WebServer.cs	2026-07-08 15:43:27
+@@ -36,7 +36,7 @@
+             {
+                 try
+                 {
+-                    httpListener.Prefixes.Remove($"http://+:{CommandConfig.webServerPort}/");
++                    httpListener.Prefixes.Remove($"http://127.0.0.1:{CommandConfig.webServerPort}/");
+                     Start();
+                 }
+                 catch (Exception ex)
+@@ -49,7 +49,7 @@
+ 
+         public static void Start()
+         {
+-            httpListener.Prefixes.Add($"http://+:{CommandConfig.webServerPort}/");
++            httpListener.Prefixes.Add($"http://127.0.0.1:{CommandConfig.webServerPort}/");
+             httpListener.Start();
+             listenerTask = Task.Run(ListenAsync);
+         }
+@@ -266,7 +266,7 @@
+                 if (VaildFilePath(preUrl))   // 优先查找本地文件
+                 {
+                     context.Response.ContentType = GetMimeType(Path.GetExtension(preUrl));
+-                    var file = await File.ReadAllBytesAsync(preUrl);
++                    var file = File.ReadAllBytes(preUrl);
+                     await context.Response.OutputStream.WriteAsync(file, 0, file.Length);
+                 }
+                 else if (rawUrLower == "/safeimg")

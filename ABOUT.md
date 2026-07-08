@@ -8,6 +8,10 @@ macOS Hearthstone setup. This project documents the compatibility work needed
 to build/load HsMod locally, then packages the macOS launch-wrapper and
 reinject flow into a small app.
 
+The public repository intentionally does not bundle HsMod/BepInEx binaries. It
+provides patches and scripts that let users supply upstream archives locally,
+then build and install the compatible setup on their own machine.
+
 It is intentionally kept separate from HsMod itself because it does not change
 HsMod gameplay features. It manages the macOS launch wrapper, BepInEx resource
 layout, app re-signing, and post-update reinjection flow needed for this tested
