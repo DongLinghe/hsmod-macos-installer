@@ -91,6 +91,22 @@ macOS 启动/注入链路做了这些处理：
 - BepInEx macOS universal zip
 - 已安装的 macOS 炉石，默认路径 `/Applications/Hearthstone/Hearthstone.app`
 
+也可以直接 clone 两个 GitHub 项目：
+
+```sh
+git clone https://github.com/DongLinghe/hsmod-macos-reinject.git
+git clone https://github.com/Pik-4/HsMod.git
+cd hsmod-macos-reinject
+```
+
+然后提供 HsMod 源码目录和 BepInEx zip：
+
+```sh
+HSMOD_SOURCE=../HsMod \
+BEPINEX_ZIP=/path/to/BepInEx_macos_universal_5.4.23.5.zip \
+./scripts/install_from_archives.sh
+```
+
 运行：
 
 ```sh
