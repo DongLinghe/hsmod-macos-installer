@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>reinject_current_hsmod.sh</string>
+    <string>apply_current_install.sh</string>
     <key>CFBundleIdentifier</key>
-    <string>local.hsmod.reinject</string>
+    <string>local.hsmod.macos.helper</string>
     <key>CFBundleName</key>
-    <string>HsMod Reinject</string>
+    <string>HsMod macOS Helper</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

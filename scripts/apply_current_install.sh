@@ -1,7 +1,7 @@
 #!/bin/zsh
 set -uo pipefail
 
-LOG="$HOME/Library/Logs/HsModReinject.log"
+LOG="$HOME/Library/Logs/HsModMacOSHelper.log"
 mkdir -p "$(dirname "$LOG")"
 exec >>"$LOG" 2>&1
 
@@ -10,7 +10,7 @@ timestamp() {
 }
 
 alert() {
-    /usr/bin/osascript -e "display alert \"HsMod Reinject\" message \"$1\" as informational" >/dev/null 2>&1 || true
+    /usr/bin/osascript -e "display alert \"HsMod macOS Helper\" message \"$1\" as informational" >/dev/null 2>&1 || true
 }
 
 fail() {
@@ -25,7 +25,7 @@ run() {
 }
 
 echo ""
-echo "===== HsMod reinject started at $(timestamp) ====="
+echo "===== HsMod macOS setup started at $(timestamp) ====="
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 RESOURCES_DIR="$(cd "$SCRIPT_DIR/../Resources" && pwd -P)"
@@ -47,11 +47,11 @@ if [ ! -e "$EXE_PATH" ]; then
 fi
 
 if /usr/bin/pgrep -f "$MACOS_DIR/$EXE_NAME" >/dev/null 2>&1 || /usr/bin/pgrep -f "$MACOS_DIR/$EXE_NAME.real" >/dev/null 2>&1; then
-    fail "炉石还在运行。请先退出炉石，再重新打开这个注入器。"
+    fail "炉石还在运行。请先退出炉石，再重新打开这个工具。"
 fi
 
 for required in HsModLauncher.c HsMod.dll libdoorstop.dylib BepInEx_macos_universal_5.4.23.5.zip; do
-    [ -e "$RESOURCES_DIR/$required" ] || fail "注入器资源缺失：$required"
+    [ -e "$RESOURCES_DIR/$required" ] || fail "工具资源缺失：$required"
 done
 
 command -v clang >/dev/null 2>&1 || fail "找不到 clang。请先安装 Xcode Command Line Tools。"
@@ -67,10 +67,10 @@ echo "Real executable: $REAL_PATH"
 echo "Backup dir: $BACKUP_DIR"
 
 if [ -e "$EXE_PATH" ]; then
-    run cp -p "$EXE_PATH" "$BACKUP_DIR/$EXE_NAME.before-reinject"
+    run cp -p "$EXE_PATH" "$BACKUP_DIR/$EXE_NAME.before-hsmod-macos"
 fi
 if [ -e "$REAL_PATH" ]; then
-    run cp -p "$REAL_PATH" "$BACKUP_DIR/$EXE_NAME.real.before-reinject"
+    run cp -p "$REAL_PATH" "$BACKUP_DIR/$EXE_NAME.real.before-hsmod-macos"
 fi
 
 EXE_DESC="$(/usr/bin/file -b "$EXE_PATH")"
@@ -120,6 +120,6 @@ run codesign -f -s - "$REAL_PATH"
 run codesign -f -s - --deep "$HEARTHSTONE_APP"
 run codesign --verify --verbose=2 "$HEARTHSTONE_APP"
 
-echo "===== HsMod reinject finished at $(timestamp) ====="
+echo "===== HsMod macOS setup finished at $(timestamp) ====="
 alert "注入完成。以后从 Battle.net 点“进入游戏”即可启用 HsMod。\n\n日志：$LOG"
 exit 0

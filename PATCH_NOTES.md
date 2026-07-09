@@ -18,7 +18,8 @@ The local build used for testing required these changes:
   listener address in this setup.
 
 These changes were used to produce the local `HsMod.dll`. They are not included
-as an upstream HsMod fork in this repository.
+as a vendored HsMod source tree; the patch is included at
+`patches/hsmod-macos-compat.patch`.
 
 ## macOS launch chain
 
@@ -43,17 +44,17 @@ Preloader in this environment. However, BepInEx 5 / MonoMod.RuntimeDetour fails
 during preloader patching on arm64e. The working solution therefore uses an
 x86_64 wrapper and Rosetta.
 
-## Reinject app
+## Helper app
 
 The source repository does not bundle third-party binaries. The repeatable part
 of the setup is split into two paths:
 
 - `scripts/install_from_archives.sh` asks for HsMod source and BepInEx archives,
   applies the patch, builds `HsMod.dll`, then installs everything.
-- `HsMod Reinject.app` can be built as a private local snapshot after resources
+- `HsMod macOS Helper.app` can be built as a local snapshot after resources
   are already present on the machine.
 
-The private app packages:
+The helper app packages:
 
 - copy the known-good HsMod/BepInEx resources,
 - recreate the wrapper,
