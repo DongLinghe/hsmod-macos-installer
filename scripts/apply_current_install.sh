@@ -51,7 +51,7 @@ if /usr/bin/pgrep -f "$MACOS_DIR/$EXE_NAME" >/dev/null 2>&1 || /usr/bin/pgrep -f
     fail "炉石还在运行。请先退出炉石，再重新打开这个工具。"
 fi
 
-for required in HsModLauncher.c HsMod.dll libdoorstop.dylib BepInEx_macos_universal_5.4.23.5.zip; do
+for required in HsModLauncher.c HsMod.dll libdoorstop.dylib BepInEx.zip; do
     [ -e "$RESOURCES_DIR/$required" ] || fail "工具资源缺失：$required"
 done
 
@@ -96,7 +96,7 @@ fi
 
 echo "Installing BepInEx if needed..."
 if [ ! -d "$ROOT_DIR/BepInEx/core" ]; then
-    run /usr/bin/ditto -x -k "$RESOURCES_DIR/BepInEx_macos_universal_5.4.23.5.zip" "$ROOT_DIR"
+    run /usr/bin/ditto -x -k "$RESOURCES_DIR/BepInEx.zip" "$ROOT_DIR"
 fi
 
 run mkdir -p "$ROOT_DIR/BepInEx/plugins"

@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
 HEARTHSTONE_ROOT="${HEARTHSTONE_ROOT:-/Applications/Hearthstone}"
-BEPINEX_ZIP="${BEPINEX_ZIP:-$HOME/Downloads/BepInEx_macos_universal_5.4.23.5.zip}"
+BEPINEX_ZIP="${BEPINEX_ZIP:-}"
 APP_PATH="$ROOT_DIR/dist/HsMod macOS Helper.app"
 
 fail() {
@@ -23,6 +23,10 @@ need_file "$ROOT_DIR/src/HsModLauncher.c"
 need_file "$ROOT_DIR/scripts/apply_current_install.sh"
 need_file "$ROOT_DIR/scripts/restore_original_hearthstone.sh"
 need_file "$ROOT_DIR/templates/Info.plist"
+if [ -z "$BEPINEX_ZIP" ]; then
+    BEPINEX_ZIP="$(find "$HOME/Downloads" -maxdepth 1 -iname 'BepInEx*macos*universal*.zip' -print | sort | tail -1)"
+fi
+[ -n "$BEPINEX_ZIP" ] || fail "missing BepInEx macOS universal zip"
 need_file "$BEPINEX_ZIP"
 need_file "$HEARTHSTONE_ROOT/BepInEx/plugins/HsMod.dll"
 need_file "$HEARTHSTONE_ROOT/libdoorstop.dylib"
@@ -40,7 +44,7 @@ cp "$ROOT_DIR/scripts/restore_original_hearthstone.sh" "$APP_PATH/Contents/Resou
 cp "$ROOT_DIR/src/HsModLauncher.c" "$APP_PATH/Contents/Resources/HsModLauncher.c"
 cp "$HEARTHSTONE_ROOT/BepInEx/plugins/HsMod.dll" "$APP_PATH/Contents/Resources/HsMod.dll"
 cp "$HEARTHSTONE_ROOT/libdoorstop.dylib" "$APP_PATH/Contents/Resources/libdoorstop.dylib"
-cp "$BEPINEX_ZIP" "$APP_PATH/Contents/Resources/BepInEx_macos_universal_5.4.23.5.zip"
+cp "$BEPINEX_ZIP" "$APP_PATH/Contents/Resources/BepInEx.zip"
 /usr/bin/ditto "$HEARTHSTONE_ROOT/BepInEx/unstripped_corlib" "$APP_PATH/Contents/Resources/unstripped_corlib"
 
 chmod +x "$APP_PATH/Contents/MacOS/apply_current_install.sh"

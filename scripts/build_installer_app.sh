@@ -65,6 +65,7 @@ for script in \
     apply_current_install.sh \
     build_patched_hsmod.sh \
     install_from_archives.sh \
+    patch_hsmod_source.sh \
     reinject_current_install.sh \
     restore_original_hearthstone.sh \
     watch_current_install.sh; do

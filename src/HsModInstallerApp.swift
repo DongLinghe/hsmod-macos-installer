@@ -114,9 +114,9 @@ private final class DropFieldView: NSView {
 }
 
 final class InstallerController: NSObject, NSApplicationDelegate {
-    private let hsmodURL = "https://github.com/Pik-4/HsMod/archive/refs/heads/bepinex5.zip"
-    private let bepinexReleaseURL = "https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5"
-    private let bepinexZipURL = "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_macos_universal_5.4.23.5.zip"
+    private let hsmodRepoURL = "https://github.com/Pik-4/HsMod"
+    private let hsmodArchiveURL = "https://github.com/Pik-4/HsMod/archive/refs/heads/bepinex5.zip"
+    private let bepinexReleasesURL = "https://github.com/BepInEx/BepInEx/releases"
     private let guiPath = "/usr/local/share/dotnet:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
     private let window = NSWindow(
@@ -140,6 +140,10 @@ final class InstallerController: NSObject, NSApplicationDelegate {
     private var bepinexPath = ""
     private var hearthstonePath = ""
     private var currentProcess: Process?
+
+    private var isBusy: Bool {
+        currentProcess != nil
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
@@ -275,9 +279,9 @@ final class InstallerController: NSObject, NSApplicationDelegate {
     private func render() {
         clear(contentStack)
 
-        statusLabel.stringValue = currentProcess == nil ? "第 \(step.rawValue + 1) / \(WizardStep.allCases.count) 步" : statusLabel.stringValue
-        backButton.isEnabled = currentProcess == nil && step.rawValue > 0
-        primaryButton.isEnabled = currentProcess == nil
+        statusLabel.stringValue = !isBusy ? "第 \(step.rawValue + 1) / \(WizardStep.allCases.count) 步" : statusLabel.stringValue
+        backButton.isEnabled = !isBusy && step.rawValue > 0
+        primaryButton.isEnabled = !isBusy
         reinjectButton.isHidden = step != .install
         openPackButton.isHidden = step != .install
         primaryButton.title = step == .install ? "开始安装" : "下一步"
@@ -298,19 +302,20 @@ final class InstallerController: NSObject, NSApplicationDelegate {
 
     private func renderIntro() {
         contentStack.addArrangedSubview(pageTitle("先准备三个文件"))
-        contentStack.addArrangedSubview(paragraph("这个向导会一步步带你完成：下载 HsMod 源码 zip、下载 BepInEx macOS universal zip、选择 Hearthstone.app，然后安装器会自动构建 patched HsMod.dll 并注入到炉石。"))
+        contentStack.addArrangedSubview(paragraph("这个向导会一步步带你完成：从 GitHub 下载 HsMod bepinex5 源码 zip、下载 BepInEx 5 macOS universal zip、选择 Hearthstone.app，然后安装器会自动构建 patched HsMod.dll 并注入到炉石。"))
         contentStack.addArrangedSubview(paragraph("如果以后炉石更新或 Battle.net 把启动文件恢复了，回到最后一步点“重新注入”即可。"))
         contentStack.addArrangedSubview(fillView())
     }
 
     private func renderHsMod() {
         contentStack.addArrangedSubview(pageTitle("下载并选择 HsMod"))
-        contentStack.addArrangedSubview(paragraph("需要 HsMod 的 bepinex5 源码 zip。它里面应当包含 HsMod/HsMod.csproj。"))
-        contentStack.addArrangedSubview(linkRow(urlString: hsmodURL, buttons: [
-            ("打开 HsMod 下载", { [weak self] in self?.openURL(self?.hsmodURL) })
+        contentStack.addArrangedSubview(paragraph("需要 HsMod 的 bepinex5 分支源码 zip。点下面的链接从 GitHub 下载最新源码；如果你已经有源码 zip，也可以直接拖进来。"))
+        contentStack.addArrangedSubview(linkRow(urlString: hsmodArchiveURL, buttons: [
+            ("下载源码 zip", { [weak self] in self?.openURL(self?.hsmodArchiveURL) }),
+            ("打开 GitHub", { [weak self] in self?.openURL(self?.hsmodRepoURL) })
         ]))
 
-        let drop = DropFieldView(title: "拖入 HsMod-bepinex5.zip", placeholder: "也可以拖入解压后的 HsMod-bepinex5 文件夹")
+        let drop = DropFieldView(title: "拖入 HsMod 源码 zip", placeholder: "也可以拖入解压后的 HsMod 源码文件夹")
         drop.representedPath = hsmodPath
         drop.onChoose = { [weak self] in self?.chooseHsMod() }
         drop.onDropPath = { [weak self] path in
@@ -323,13 +328,12 @@ final class InstallerController: NSObject, NSApplicationDelegate {
 
     private func renderBepInEx() {
         contentStack.addArrangedSubview(pageTitle("下载并选择 BepInEx"))
-        contentStack.addArrangedSubview(paragraph("需要 BepInEx 5 的 macOS universal zip。它里面应当包含 libdoorstop.dylib。"))
-        contentStack.addArrangedSubview(linkRow(urlString: bepinexZipURL, buttons: [
-            ("打开 Release 页", { [weak self] in self?.openURL(self?.bepinexReleaseURL) }),
-            ("直接下载 zip", { [weak self] in self?.openURL(self?.bepinexZipURL) })
+        contentStack.addArrangedSubview(paragraph("需要 BepInEx 5 的 macOS universal zip。点下面的 Releases 链接，下载最新的 macOS universal zip；如果你已经有 zip，也可以直接拖进来。"))
+        contentStack.addArrangedSubview(linkRow(urlString: bepinexReleasesURL, buttons: [
+            ("打开 Releases", { [weak self] in self?.openURL(self?.bepinexReleasesURL) })
         ]))
 
-        let drop = DropFieldView(title: "拖入 BepInEx_macos_universal_5.4.23.5.zip", placeholder: "不要把这个 zip 放到 HsMod 那一步")
+        let drop = DropFieldView(title: "拖入 BepInEx macOS universal zip", placeholder: "不要把这个 zip 放到 HsMod 那一步")
         drop.representedPath = bepinexPath
         drop.onChoose = { [weak self] in self?.chooseBepInEx() }
         drop.onDropPath = { [weak self] path in
@@ -447,14 +451,14 @@ final class InstallerController: NSObject, NSApplicationDelegate {
     }
 
     private func prefillDefaults() {
-        for candidate in downloadsCandidates(["HsMod-bepinex5.zip", "HsMod-bepinex5 (1).zip", "HsMod-bepinex5"]) {
+        for candidate in downloadsCandidates(containing: ["hsmod"]) {
             if hsmodSourceLooksValid(candidate) {
                 hsmodPath = candidate
                 break
             }
         }
 
-        for candidate in downloadsCandidates(["BepInEx_macos_universal_5.4.23.5.zip", "BepInEx_macos_universal_5.4.23.5 (1).zip"]) {
+        for candidate in downloadsCandidates(containing: ["bepinex"]) {
             if bepinexZipLooksValid(candidate) {
                 bepinexPath = candidate
                 break
@@ -504,12 +508,12 @@ final class InstallerController: NSObject, NSApplicationDelegate {
     private func validateHsMod() -> Bool {
         hsmodPath = expandedPath(hsmodPath)
         guard FileManager.default.fileExists(atPath: hsmodPath) else {
-            showAlert("请选择 HsMod-bepinex5.zip，或者包含 HsMod/HsMod.csproj 的源码文件夹。")
+            showAlert("请选择 HsMod 源码 zip，或者包含 HsMod/HsMod.csproj 的源码文件夹。")
             return false
         }
         guard hsmodSourceLooksValid(hsmodPath) else {
             if bepinexZipLooksValid(hsmodPath) {
-                showAlert("这里选成了 BepInEx。请在这一步选择 HsMod-bepinex5.zip。")
+                showAlert("这里选成了 BepInEx。请在这一步选择 HsMod 源码 zip。")
             } else {
                 showAlert("这个文件不是可用的 HsMod 源码包。需要能找到 HsMod/HsMod.csproj。")
             }
@@ -521,12 +525,12 @@ final class InstallerController: NSObject, NSApplicationDelegate {
     private func validateBepInEx() -> Bool {
         bepinexPath = expandedPath(bepinexPath)
         guard FileManager.default.fileExists(atPath: bepinexPath) else {
-            showAlert("请选择 BepInEx_macos_universal_5.4.23.5.zip。")
+            showAlert("请选择 BepInEx 5 macOS universal zip。")
             return false
         }
         guard bepinexZipLooksValid(bepinexPath) else {
             if hsmodSourceLooksValid(bepinexPath) {
-                showAlert("这里选成了 HsMod。请在这一步选择 BepInEx_macos_universal_5.4.23.5.zip。")
+                showAlert("这里选成了 HsMod。请在这一步选择 BepInEx 5 macOS universal zip。")
             } else {
                 showAlert("这个文件不是可用的 BepInEx macOS zip。需要能找到 libdoorstop.dylib。")
             }
@@ -559,7 +563,7 @@ final class InstallerController: NSObject, NSApplicationDelegate {
 
     @objc private func chooseHsMod() {
         let panel = NSOpenPanel()
-        panel.title = "选择 HsMod-bepinex5.zip 或源码文件夹"
+        panel.title = "选择 HsMod 源码 zip 或源码文件夹"
         panel.canChooseFiles = true
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
@@ -571,7 +575,7 @@ final class InstallerController: NSObject, NSApplicationDelegate {
 
     @objc private func chooseBepInEx() {
         let panel = NSOpenPanel()
-        panel.title = "选择 BepInEx_macos_universal_5.4.23.5.zip"
+        panel.title = "选择 BepInEx 5 macOS universal zip"
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowedContentTypes = [.zip]
@@ -745,10 +749,27 @@ final class InstallerController: NSObject, NSApplicationDelegate {
         NSString(string: rawPath.trimmingCharacters(in: .whitespacesAndNewlines)).expandingTildeInPath
     }
 
-    private func downloadsCandidates(_ names: [String]) -> [String] {
+    private func downloadsCandidates(containing needles: [String]) -> [String] {
         let downloads = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Downloads", isDirectory: true)
-        return names.map { downloads.appendingPathComponent($0).path }
+        let keys: [URLResourceKey] = [.contentModificationDateKey]
+        let urls = (try? FileManager.default.contentsOfDirectory(
+            at: downloads,
+            includingPropertiesForKeys: keys,
+            options: [.skipsHiddenFiles]
+        )) ?? []
+
+        return urls
+            .filter { url in
+                let name = url.lastPathComponent.lowercased()
+                return needles.allSatisfy { name.contains($0) }
+            }
+            .sorted { left, right in
+                let leftDate = (try? left.resourceValues(forKeys: Set(keys)).contentModificationDate) ?? .distantPast
+                let rightDate = (try? right.resourceValues(forKeys: Set(keys)).contentModificationDate) ?? .distantPast
+                return leftDate > rightDate
+            }
+            .map(\.path)
     }
 
     private func hsmodSourceLooksValid(_ path: String) -> Bool {

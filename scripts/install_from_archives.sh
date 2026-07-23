@@ -26,11 +26,11 @@ command -v dotnet >/dev/null 2>&1 || fail "dotnet not found"
 command -v clang >/dev/null 2>&1 || fail "clang not found"
 
 if [ -z "$HSMOD_SOURCE" ]; then
-    HSMOD_SOURCE="$(choose_file '请选择 HsMod-bepinex5.zip 或 HsMod 源码压缩包')"
+    HSMOD_SOURCE="$(choose_file '请选择 HsMod 源码 zip 或源码文件夹')"
 fi
 
 if [ -z "$BEPINEX_ZIP" ]; then
-    BEPINEX_ZIP="$(choose_file '请选择 BepInEx_macos_universal_5.4.23.5.zip')"
+    BEPINEX_ZIP="$(choose_file '请选择 BepInEx 5 macOS universal zip')"
 fi
 
 [ -e "$HSMOD_SOURCE" ] || fail "HsMod source not found: $HSMOD_SOURCE"
@@ -71,7 +71,7 @@ cp "$ROOT_DIR/scripts/restore_original_hearthstone.sh" "$APP_PATH/Contents/Resou
 cp "$ROOT_DIR/src/HsModLauncher.c" "$APP_PATH/Contents/Resources/HsModLauncher.c"
 cp "$WORK_DIR/resources/HsMod.dll" "$APP_PATH/Contents/Resources/HsMod.dll"
 cp "$WORK_DIR/bepinex/libdoorstop.dylib" "$APP_PATH/Contents/Resources/libdoorstop.dylib"
-cp "$BEPINEX_ZIP" "$APP_PATH/Contents/Resources/BepInEx_macos_universal_5.4.23.5.zip"
+cp "$BEPINEX_ZIP" "$APP_PATH/Contents/Resources/BepInEx.zip"
 /usr/bin/ditto "$WORK_DIR/resources/unstripped_corlib" "$APP_PATH/Contents/Resources/unstripped_corlib"
 chmod +x "$APP_PATH/Contents/MacOS/apply_current_install.sh" "$APP_PATH/Contents/Resources/restore_original_hearthstone.sh"
 xattr -cr "$APP_PATH"

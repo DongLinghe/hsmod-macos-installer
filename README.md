@@ -26,8 +26,8 @@ HsMod macOS Installer.app
 
 ### 你需要准备
 
-- HsMod 源码目录，或 HsMod 源码 zip，例如 `HsMod-bepinex5.zip`
-- BepInEx 5 macOS universal zip，例如 `BepInEx_macos_universal_5.4.23.5.zip`
+- HsMod bepinex5 分支源码目录，或从 GitHub 下载的源码 zip
+- BepInEx 5 macOS universal zip
 - 已安装的 macOS 版炉石传说，通常是：
 
 ```text
@@ -37,8 +37,8 @@ HsMod macOS Installer.app
 ### 使用方法
 
 1. 打开 `HsMod macOS Installer.app`
-2. 点 `下一步` 打开 HsMod 页面，按页面里的链接下载 `HsMod-bepinex5.zip`，然后拖入安装器或从 Finder 选择
-3. 点 `下一步` 打开 BepInEx 页面，按页面里的链接下载 `BepInEx_macos_universal_5.4.23.5.zip`，然后拖入安装器或从 Finder 选择
+2. 点 `下一步` 打开 HsMod 页面，按页面里的 GitHub 链接下载最新 HsMod 源码 zip，然后拖入安装器或从 Finder 选择
+3. 点 `下一步` 打开 BepInEx 页面，按页面里的 Releases 链接下载 BepInEx 5 macOS universal zip，然后拖入安装器或从 Finder 选择
 4. 点 `下一步` 选择 `Hearthstone.app`，或者选择 `/Applications/Hearthstone` 文件夹
 5. 点 `下一步` 到确认页面，再点击 `开始安装`
 6. 安装完成后，安装器会打开 Battle.net；从 Battle.net 点“进入游戏”
@@ -52,7 +52,7 @@ http://127.0.0.1:58744/pack
 
 ### 安装器会做什么
 
-- 给 HsMod 源码应用 `patches/hsmod-macos-compat.patch`
+- 给 HsMod 源码应用幂等的 macOS 兼容改动
 - 在 macOS 上构建 patched `HsMod.dll`
 - 解压 BepInEx 到炉石目录
 - 安装 `BepInEx/plugins/HsMod.dll`
@@ -65,6 +65,7 @@ http://127.0.0.1:58744/pack
 
 HsMod 构建侧：
 
+- 补丁逻辑按源码结构和代码片段处理，不绑定某一次 HsMod zip 快照
 - 添加 .NET Framework 4.8 reference assemblies，方便在 macOS 用 `dotnet build`
 - 禁用 Windows-only `install.bat` post-build
 - 修正当前 macOS 构建/运行环境里不兼容的 C# API 用法
@@ -156,8 +157,8 @@ If macOS says it cannot verify the developer, Control-click the app and choose
 
 ### Files You Need
 
-- HsMod source directory, or a source zip such as `HsMod-bepinex5.zip`
-- BepInEx 5 macOS universal zip, such as `BepInEx_macos_universal_5.4.23.5.zip`
+- HsMod bepinex5 branch source directory, or a source zip downloaded from GitHub
+- BepInEx 5 macOS universal zip
 - macOS Hearthstone, usually installed at:
 
 ```text
@@ -167,8 +168,8 @@ If macOS says it cannot verify the developer, Control-click the app and choose
 ### Usage
 
 1. Open `HsMod macOS Installer.app`
-2. Click `下一步` to open the HsMod page, download `HsMod-bepinex5.zip` from the link shown there, then drag it into the installer or choose it from Finder
-3. Click `下一步` to open the BepInEx page, download `BepInEx_macos_universal_5.4.23.5.zip` from the link shown there, then drag it into the installer or choose it from Finder
+2. Click `下一步` to open the HsMod page, download the latest HsMod source zip from the GitHub link shown there, then drag it into the installer or choose it from Finder
+3. Click `下一步` to open the BepInEx page, download the BepInEx 5 macOS universal zip from the Releases link shown there, then drag it into the installer or choose it from Finder
 4. Select `Hearthstone.app`, or the `/Applications/Hearthstone` folder
 5. Continue to the confirmation page and click `开始安装`
 6. When installation finishes, the installer opens Battle.net; launch Hearthstone from Battle.net
@@ -182,7 +183,7 @@ If Hearthstone updates or Battle.net restores the official executable, quit Hear
 
 ### What The Installer Does
 
-- Applies `patches/hsmod-macos-compat.patch` to the HsMod source
+- Applies idempotent macOS compatibility edits to the HsMod source
 - Builds a patched `HsMod.dll` on macOS
 - Extracts BepInEx into the Hearthstone directory
 - Installs `BepInEx/plugins/HsMod.dll`
@@ -195,6 +196,7 @@ If Hearthstone updates or Battle.net restores the official executable, quit Hear
 
 HsMod build changes:
 
+- Patch logic is based on source structure and code snippets, not on one fixed HsMod zip snapshot
 - Add .NET Framework 4.8 reference assemblies for `dotnet build` on macOS
 - Disable the Windows-only `install.bat` post-build step
 - Adjust C# API usage that fails in the tested macOS build/runtime path

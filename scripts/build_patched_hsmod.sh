@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
-PATCH_FILE="$ROOT_DIR/patches/hsmod-macos-compat.patch"
+PATCH_SCRIPT="$ROOT_DIR/scripts/patch_hsmod_source.sh"
 INPUT="${1:-}"
 OUTPUT="${2:-$ROOT_DIR/dist/HsMod.dll}"
 BUILD_DIR="${HSMOD_BUILD_DIR:-$ROOT_DIR/build/hsmod-source}"
@@ -14,20 +14,20 @@ fail() {
 
 fail_bad_hsmod_input() {
     if find "$BUILD_DIR" -maxdepth 4 -name libdoorstop.dylib -print -quit | grep -q .; then
-        fail "HsMod input looks like a BepInEx package. Select HsMod-bepinex5.zip or a source folder that contains HsMod/HsMod.csproj."
+        fail "HsMod input looks like a BepInEx package. Select an HsMod source zip or a source folder that contains HsMod/HsMod.csproj."
     fi
 
-    fail "could not find HsMod/HsMod.csproj in input. Select HsMod-bepinex5.zip, not the BepInEx zip."
+    fail "could not find HsMod/HsMod.csproj in input. Select an HsMod source zip, not the BepInEx zip."
 }
 
 usage() {
     cat <<'USAGE'
 Usage:
-  ./scripts/build_patched_hsmod.sh /path/to/HsMod-bepinex5.zip [output.dll]
+  ./scripts/build_patched_hsmod.sh /path/to/HsMod-source.zip [output.dll]
   ./scripts/build_patched_hsmod.sh /path/to/HsMod-source-dir [output.dll]
 
-The script applies patches/hsmod-macos-compat.patch, restores the .NET project,
-builds Release, and copies HsMod.dll to output.dll.
+The script applies idempotent macOS compatibility edits, restores the .NET
+project, builds Release, and copies HsMod.dll to output.dll.
 USAGE
 }
 
@@ -37,9 +37,8 @@ USAGE
 }
 
 [ -e "$INPUT" ] || fail "input not found: $INPUT"
-[ -e "$PATCH_FILE" ] || fail "patch not found: $PATCH_FILE"
+[ -x "$PATCH_SCRIPT" ] || fail "patch script not found or not executable: $PATCH_SCRIPT"
 command -v dotnet >/dev/null 2>&1 || fail "dotnet not found"
-command -v git >/dev/null 2>&1 || fail "git not found"
 
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
@@ -71,14 +70,7 @@ echo "source: $SOURCE_ROOT"
 
 (
     cd "$SOURCE_ROOT"
-    if git apply --check "$PATCH_FILE" >/dev/null 2>&1; then
-        git apply "$PATCH_FILE"
-        echo "patch: applied"
-    elif git apply --reverse --check "$PATCH_FILE" >/dev/null 2>&1; then
-        echo "patch: already applied"
-    else
-        fail "patch does not apply cleanly"
-    fi
+    "$PATCH_SCRIPT" "$SOURCE_ROOT"
 
     dotnet restore HsMod/HsMod.csproj
     dotnet build HsMod/HsMod.csproj --configuration Release --no-restore
