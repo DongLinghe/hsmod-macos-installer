@@ -22,6 +22,8 @@ HsMod-macOS-Installer.zip
 HsMod macOS Installer.app
 ```
 
+如果 macOS 提示无法验证开发者，右键点击 app，选择“打开”。
+
 ### 你需要准备
 
 - HsMod 源码目录，或 HsMod 源码 zip，例如 `HsMod-bepinex5.zip`
@@ -148,6 +150,9 @@ Unzip it and open:
 ```text
 HsMod macOS Installer.app
 ```
+
+If macOS says it cannot verify the developer, Control-click the app and choose
+`Open`.
 
 ### Files You Need
 
