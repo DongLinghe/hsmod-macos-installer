@@ -11,7 +11,7 @@
 - HsMod 的 macOS 兼容补丁
 - patched `HsMod.dll` 构建脚本
 - BepInEx/HsMod 安装脚本
-- Battle.net 可用的 macOS launcher wrapper
+- Battle.net 启动前可恢复的 macOS launcher wrapper
 - 炉石更新后的快捷恢复工具
 
 ### 适用环境
@@ -61,11 +61,19 @@ BEPINEX_ZIP=/path/to/BepInEx_macos_universal_5.4.23.5.zip \
 
 如果不传 `HSMOD_SOURCE` 和 `BEPINEX_ZIP`，脚本会弹出文件选择框。
 
-安装完成后，从 Battle.net 点“进入游戏”，然后打开：
+安装完成后，请立即从 Battle.net 点“进入游戏”，然后打开：
 
 ```text
 http://127.0.0.1:58744/pack
 ```
+
+如果 Battle.net 后台校验后恢复了官方启动文件，HsMod 会失效。退出炉石后运行：
+
+```sh
+./scripts/watch_current_install.sh
+```
+
+然后在 Battle.net 点“进入游戏”。这个脚本会在等待启动时自动把 wrapper 放回当前炉石版本。
 
 ### 只构建 HsMod.dll
 
@@ -103,7 +111,13 @@ BEPINEX_ZIP=/path/to/BepInEx_macos_universal_5.4.23.5.zip \
 dist/HsMod macOS Helper.app
 ```
 
-之后炉石更新导致 HsMod 失效时，退出炉石，双击这个 app 即可恢复当前机器上的安装。
+之后炉石更新或 Battle.net 恢复启动文件导致 HsMod 失效时，退出炉石，双击这个 app 恢复当前机器上的安装，然后立即从 Battle.net 启动游戏。
+
+已经完整安装过一次后，也可以只快速恢复当前启动文件：
+
+```sh
+./scripts/reinject_current_install.sh
+```
 
 ### 恢复原版启动文件
 
@@ -142,9 +156,11 @@ macOS 启动链路：
 - 安装 `unstripped_corlib`
 - 保存原始炉石二进制为 `Hearthstone.real`
 - 使用已签名 x86_64 launcher wrapper 启动原始游戏
-- 保留 Battle.net 登录 token 传递
+- 从 Battle.net 启动时保留登录 token 传递
 
 `arm64e` Doorstop 可以编译，但 BepInEx 5 / MonoMod.RuntimeDetour 在 arm64e 预加载阶段失败。当前可用方案使用 Rosetta/x86_64 wrapper。
+
+Battle.net/Agent 可能会在更新或版本校验后恢复官方启动文件；这是当前方案需要在启动前重新注入 wrapper 的原因。
 
 ### 上游项目
 
@@ -165,7 +181,7 @@ This project provides:
 - macOS compatibility patches for HsMod
 - a script for building a patched `HsMod.dll`
 - a BepInEx/HsMod installer script
-- a Battle.net-compatible macOS launcher wrapper
+- a macOS launcher wrapper that can be re-applied before Battle.net launch
 - an optional helper app for restoring the setup after Hearthstone updates
 
 ### Requirements
@@ -213,11 +229,19 @@ BEPINEX_ZIP=/path/to/BepInEx_macos_universal_5.4.23.5.zip \
 
 If `HSMOD_SOURCE` and `BEPINEX_ZIP` are omitted, the script opens file pickers.
 
-After installation, launch Hearthstone from Battle.net and open:
+After installation, immediately launch Hearthstone from Battle.net and open:
 
 ```text
 http://127.0.0.1:58744/pack
 ```
+
+If Battle.net restores the official executable during version checks, HsMod will stop loading. Quit Hearthstone, then run:
+
+```sh
+./scripts/watch_current_install.sh
+```
+
+Click Play in Battle.net while the watcher is running. It re-applies the wrapper if Battle.net restores the executable before launch.
 
 ### Build HsMod.dll Only
 
@@ -257,7 +281,14 @@ dist/HsMod macOS Helper.app
 ```
 
 When an update breaks the setup, quit Hearthstone and run this helper app to
-restore the current machine's installation.
+restore the current machine's installation, then immediately launch from Battle.net.
+
+After a full install has succeeded once, you can also quickly restore the
+launcher wrapper:
+
+```sh
+./scripts/reinject_current_install.sh
+```
 
 ### Restore Original Launcher
 
@@ -294,11 +325,14 @@ macOS launch flow:
 - installs `unstripped_corlib`
 - saves the original Hearthstone binary as `Hearthstone.real`
 - launches the original game through a signed x86_64 wrapper
-- keeps Battle.net login token handoff working
+- keeps Battle.net login token handoff working when launched from Battle.net
 
 An `arm64e` Doorstop build can be produced, but BepInEx 5 /
 MonoMod.RuntimeDetour fails during arm64e preloading. The working path uses a
 Rosetta/x86_64 wrapper.
+
+Battle.net/Agent may restore the official executable after updates or version
+checks. This is why the wrapper may need to be re-applied before launch.
 
 ### Upstream Projects
 

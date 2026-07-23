@@ -34,8 +34,10 @@ The working launch chain required these changes:
   x86_64 Mach-O launcher wrapper.
 - The wrapper sets Doorstop/BepInEx environment variables and then executes
   `Hearthstone.real`.
-- Battle.net still launches `Hearthstone.app`, so login token handoff continues
-  to work.
+- When Battle.net launches the wrapper, login token handoff continues to work.
+- Battle.net/Agent may restore the official executable during updates or
+  version checks, so the wrapper may need to be re-applied immediately before
+  launch.
 
 ## Failed arm64e route
 
@@ -51,6 +53,10 @@ of the setup is split into two paths:
 
 - `scripts/install_from_archives.sh` asks for HsMod source and BepInEx archives,
   applies the patch, builds `HsMod.dll`, then installs everything.
+- `scripts/reinject_current_install.sh` quickly restores the launcher wrapper
+  after a full install has already placed BepInEx and HsMod on the machine.
+- `scripts/watch_current_install.sh` opens Battle.net and re-applies the wrapper
+  while waiting for the user to click Play.
 - `HsMod macOS Helper.app` can be built as a local snapshot after resources
   are already present on the machine.
 

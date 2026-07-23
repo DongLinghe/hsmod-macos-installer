@@ -121,5 +121,5 @@ run codesign -f -s - --deep "$HEARTHSTONE_APP"
 run codesign --verify --verbose=2 "$HEARTHSTONE_APP"
 
 echo "===== HsMod macOS setup finished at $(timestamp) ====="
-alert "注入完成。以后从 Battle.net 点“进入游戏”即可启用 HsMod。\n\n日志：$LOG"
+alert "注入完成。请现在从 Battle.net 点“进入游戏”。如果 Battle.net 后台恢复了启动文件，请重新运行这个工具。\n\n日志：$LOG"
 exit 0
