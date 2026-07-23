@@ -37,10 +37,10 @@ HsMod macOS Installer.app
 ### 使用方法
 
 1. 打开 `HsMod macOS Installer.app`
-2. 在 `HsMod` 里选择 HsMod 源码目录或源码 zip
-3. 在 `BepInEx` 里选择 BepInEx macOS universal zip
-4. 在 `Hearthstone` 里选择 `Hearthstone.app`，或者选择 `/Applications/Hearthstone` 文件夹
-5. 点击 `Install`
+2. 点 `下一步` 打开 HsMod 页面，按页面里的链接下载 `HsMod-bepinex5.zip`，然后拖入安装器或从 Finder 选择
+3. 点 `下一步` 打开 BepInEx 页面，按页面里的链接下载 `BepInEx_macos_universal_5.4.23.5.zip`，然后拖入安装器或从 Finder 选择
+4. 点 `下一步` 选择 `Hearthstone.app`，或者选择 `/Applications/Hearthstone` 文件夹
+5. 点 `下一步` 到确认页面，再点击 `开始安装`
 6. 安装完成后，安装器会打开 Battle.net；从 Battle.net 点“进入游戏”
 7. 游戏进入后打开：
 
@@ -48,7 +48,7 @@ HsMod macOS Installer.app
 http://127.0.0.1:58744/pack
 ```
 
-如果炉石更新或 Battle.net 校验后 HsMod 失效，退出炉石，重新打开安装器，点 `Re-inject`，然后马上从 Battle.net 启动游戏。
+如果炉石更新或 Battle.net 校验后 HsMod 失效，退出炉石，重新打开安装器，在确认页面点 `重新注入`，然后马上从 Battle.net 启动游戏。
 
 ### 安装器会做什么
 
@@ -167,10 +167,10 @@ If macOS says it cannot verify the developer, Control-click the app and choose
 ### Usage
 
 1. Open `HsMod macOS Installer.app`
-2. Select the HsMod source directory or source zip
-3. Select the BepInEx macOS universal zip
+2. Click `下一步` to open the HsMod page, download `HsMod-bepinex5.zip` from the link shown there, then drag it into the installer or choose it from Finder
+3. Click `下一步` to open the BepInEx page, download `BepInEx_macos_universal_5.4.23.5.zip` from the link shown there, then drag it into the installer or choose it from Finder
 4. Select `Hearthstone.app`, or the `/Applications/Hearthstone` folder
-5. Click `Install`
+5. Continue to the confirmation page and click `开始安装`
 6. When installation finishes, the installer opens Battle.net; launch Hearthstone from Battle.net
 7. After the game starts, open:
 
@@ -178,7 +178,7 @@ If macOS says it cannot verify the developer, Control-click the app and choose
 http://127.0.0.1:58744/pack
 ```
 
-If Hearthstone updates or Battle.net restores the official executable, quit Hearthstone, open the installer again, click `Re-inject`, then launch the game from Battle.net immediately.
+If Hearthstone updates or Battle.net restores the official executable, quit Hearthstone, open the installer again, click `重新注入` on the confirmation page, then launch the game from Battle.net immediately.
 
 ### What The Installer Does
 

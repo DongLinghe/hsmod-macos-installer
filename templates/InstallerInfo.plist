@@ -10,6 +10,8 @@
     <string>HsMod macOS Installer</string>
     <key>CFBundleDisplayName</key>
     <string>HsMod macOS Installer</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>LSApplicationCategoryType</key>

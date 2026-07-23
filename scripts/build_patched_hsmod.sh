@@ -12,6 +12,14 @@ fail() {
     exit 1
 }
 
+fail_bad_hsmod_input() {
+    if find "$BUILD_DIR" -maxdepth 4 -name libdoorstop.dylib -print -quit | grep -q .; then
+        fail "HsMod input looks like a BepInEx package. Select HsMod-bepinex5.zip or a source folder that contains HsMod/HsMod.csproj."
+    fi
+
+    fail "could not find HsMod/HsMod.csproj in input. Select HsMod-bepinex5.zip, not the BepInEx zip."
+}
+
 usage() {
     cat <<'USAGE'
 Usage:
@@ -53,10 +61,11 @@ fi
 if [ -d "$BUILD_DIR/source" ]; then
     SOURCE_ROOT="$BUILD_DIR/source"
 else
-    SOURCE_ROOT="$(find "$BUILD_DIR/extracted" -maxdepth 3 -name HsMod.sln -print -quit | xargs dirname)"
+    SLN_PATH="$(find "$BUILD_DIR/extracted" -maxdepth 3 -name HsMod.sln -print -quit)"
+    SOURCE_ROOT="${SLN_PATH:+$(dirname "$SLN_PATH")}"
 fi
 
-[ -n "${SOURCE_ROOT:-}" ] && [ -f "$SOURCE_ROOT/HsMod/HsMod.csproj" ] || fail "could not find HsMod/HsMod.csproj in input"
+[ -n "${SOURCE_ROOT:-}" ] && [ -f "$SOURCE_ROOT/HsMod/HsMod.csproj" ] || fail_bad_hsmod_input
 
 echo "source: $SOURCE_ROOT"
 

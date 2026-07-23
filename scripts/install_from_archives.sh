@@ -47,7 +47,8 @@ if [ -d "$HSMOD_SOURCE" ]; then
 else
     /usr/bin/ditto -x -k "$HSMOD_SOURCE" "$WORK_DIR/hsmod-src"
 fi
-HSMOD_ROOT="$(find "$WORK_DIR/hsmod-src" -maxdepth 3 -name HsMod.sln -print -quit | xargs dirname)"
+HSMOD_SLN_PATH="$(find "$WORK_DIR/hsmod-src" -maxdepth 3 -name HsMod.sln -print -quit)"
+HSMOD_ROOT="${HSMOD_SLN_PATH:+$(dirname "$HSMOD_SLN_PATH")}"
 [ -n "$HSMOD_ROOT" ] || fail "could not locate HsMod.sln after extraction"
 
 if [ -d "$HSMOD_ROOT/HsMod/UnstrippedCorlibUinx" ]; then
