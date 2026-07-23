@@ -1,7 +1,8 @@
 # Third-party notices
 
-This repository contains helper scripts and launcher source code only. It does
-not vendor HsMod, BepInEx, UnityDoorstop, or Hearthstone binaries.
+This repository contains installer source code, helper scripts, compatibility
+patches, and launcher source code only. It does not vendor HsMod, BepInEx,
+UnityDoorstop, or Hearthstone binaries.
 
 - HsMod: https://github.com/Pik-4/HsMod
   - License observed in the source archive used for local testing: AGPL-3.0.
@@ -11,5 +12,5 @@ not vendor HsMod, BepInEx, UnityDoorstop, or Hearthstone binaries.
   - License observed in the local source checkout used for testing: LGPL-2.1.
 - Hearthstone is owned by Blizzard Entertainment.
 
-If you distribute a built app that bundles third-party binaries, include the
-corresponding upstream license files and comply with each upstream license.
+The release installer app also does not bundle HsMod, BepInEx, or Hearthstone
+binaries. It asks the user to select those files locally during installation.

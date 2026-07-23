@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
 PATCH_FILE="$ROOT_DIR/patches/hsmod-macos-compat.patch"
 INPUT="${1:-}"
 OUTPUT="${2:-$ROOT_DIR/dist/HsMod.dll}"
-BUILD_DIR="$ROOT_DIR/build/hsmod-source"
+BUILD_DIR="${HSMOD_BUILD_DIR:-$ROOT_DIR/build/hsmod-source}"
 
 fail() {
     echo "error: $1" >&2

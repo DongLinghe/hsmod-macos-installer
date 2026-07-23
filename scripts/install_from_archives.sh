@@ -5,7 +5,8 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd -P)"
 HEARTHSTONE_APP="${HEARTHSTONE_APP:-/Applications/Hearthstone/Hearthstone.app}"
 HSMOD_SOURCE="${HSMOD_SOURCE:-}"
 BEPINEX_ZIP="${BEPINEX_ZIP:-}"
-WORK_DIR="$ROOT_DIR/build/install-from-archives"
+WORK_ROOT="${HSMOD_WORK_ROOT:-$ROOT_DIR/build}"
+WORK_DIR="$WORK_ROOT/install-from-archives"
 
 fail() {
     echo "error: $1" >&2
@@ -38,7 +39,7 @@ fi
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR/resources"
 
-"$ROOT_DIR/scripts/build_patched_hsmod.sh" "$HSMOD_SOURCE" "$WORK_DIR/resources/HsMod.dll"
+HSMOD_BUILD_DIR="$WORK_ROOT/hsmod-source" "$ROOT_DIR/scripts/build_patched_hsmod.sh" "$HSMOD_SOURCE" "$WORK_DIR/resources/HsMod.dll"
 
 mkdir -p "$WORK_DIR/hsmod-src"
 if [ -d "$HSMOD_SOURCE" ]; then

@@ -10,6 +10,7 @@ timestamp() {
 }
 
 alert() {
+    [ "${HSMOD_NO_ALERT:-0}" = "1" ] && return 0
     /usr/bin/osascript -e "display alert \"HsMod macOS Helper\" message \"$1\" as informational" >/dev/null 2>&1 || true
 }
 
@@ -110,7 +111,7 @@ run cp -p "$RESOURCES_DIR/libdoorstop.dylib" "$ROOT_DIR/libdoorstop.dylib"
 run codesign -f -s - "$ROOT_DIR/libdoorstop.dylib"
 
 echo "Compiling signed x86_64 launcher wrapper..."
-run clang -arch x86_64 -Os "-DHSMOD_REAL_GAME=\"$REAL_PATH\"" "$RESOURCES_DIR/HsModLauncher.c" -o "$EXE_PATH"
+run clang -arch x86_64 -mmacosx-version-min=11.0 -Os "-DHSMOD_REAL_GAME=\"$REAL_PATH\"" "$RESOURCES_DIR/HsModLauncher.c" -o "$EXE_PATH"
 run chmod +x "$EXE_PATH" "$REAL_PATH"
 
 run rm -f "$MACOS_DIR"/preloader_*.log(N)

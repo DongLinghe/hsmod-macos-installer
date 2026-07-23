@@ -1,13 +1,15 @@
 # About
 
-HsMod macOS Compatibility helps run HsMod with BepInEx on Apple Silicon macOS
-Hearthstone.
+HsMod macOS Installer is a small native macOS installer for using HsMod with
+Apple Silicon macOS Hearthstone.
 
-It provides HsMod build patches, installer scripts, and a Battle.net-compatible
-macOS launcher wrapper. It does not change HsMod gameplay features.
+It contains source code, scripts, and patches. Release assets contain the
+compiled installer app. The installer asks the user to select HsMod source,
+BepInEx, and Hearthstone, then builds and injects the compatible runtime on the
+local machine.
 
 Repository description:
 
 ```text
-Run HsMod on Apple Silicon macOS Hearthstone with BepInEx.
+GUI installer for running HsMod on Apple Silicon macOS Hearthstone.
 ```

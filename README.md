@@ -1,166 +1,127 @@
-# HsMod macOS Compatibility
+# HsMod macOS Installer
 
 [中文](#中文) | [English](#english)
 
 ## 中文
 
-让 [HsMod](https://github.com/Pik-4/HsMod) 可以在 Apple Silicon macOS 的炉石传说上运行。
+一个用于 Apple Silicon macOS 炉石传说的 HsMod 图形安装器。
 
-这个项目提供：
+原版 HsMod 的发布包主要面向 Windows/BepInEx 使用方式，直接放到 macOS 炉石里会遇到 Doorstop 架构、BepInEx 预加载、.NET Framework 构建和 Battle.net 启动文件恢复等问题。这个项目提供 macOS 兼容补丁、启动 wrapper 和一个 `.app` 安装器，让 HsMod 可以在 Apple Silicon Mac 上通过 Rosetta 跑起来。
 
-- HsMod 的 macOS 兼容补丁
-- patched `HsMod.dll` 构建脚本
-- BepInEx/HsMod 安装脚本
-- Battle.net 启动前可恢复的 macOS launcher wrapper
-- 炉石更新后的快捷恢复工具
+### 下载
 
-### 适用环境
+从 GitHub Releases 下载：
 
-- Apple Silicon Mac
-- macOS 版本支持 Rosetta 2
-- macOS 版 Hearthstone
-- BepInEx 5 macOS universal 包
-- HsMod 源码或源码 zip
+```text
+HsMod-macOS-Installer.zip
+```
 
-已验证组合：
+解压后打开：
 
-- macOS 27.0 beta
-- Hearthstone `36.0`
-- BepInEx `5.4.23.5`
-- HsMod `11.3.0.2`
+```text
+HsMod macOS Installer.app
+```
 
-### 准备文件
+### 你需要准备
 
-你需要准备：
-
-- HsMod 源码目录，或 `HsMod-bepinex5.zip`
-- `BepInEx_macos_universal_5.4.23.5.zip`
-- 已安装的炉石传说，默认路径：
+- HsMod 源码目录，或 HsMod 源码 zip，例如 `HsMod-bepinex5.zip`
+- BepInEx 5 macOS universal zip，例如 `BepInEx_macos_universal_5.4.23.5.zip`
+- 已安装的 macOS 版炉石传说，通常是：
 
 ```text
 /Applications/Hearthstone/Hearthstone.app
 ```
 
-### 安装
+### 使用方法
 
-clone 两个项目：
-
-```sh
-git clone https://github.com/DongLinghe/hsmod-macos-compat.git
-git clone https://github.com/Pik-4/HsMod.git
-cd hsmod-macos-compat
-```
-
-运行安装脚本：
-
-```sh
-HSMOD_SOURCE=../HsMod \
-BEPINEX_ZIP=/path/to/BepInEx_macos_universal_5.4.23.5.zip \
-./scripts/install_from_archives.sh
-```
-
-如果不传 `HSMOD_SOURCE` 和 `BEPINEX_ZIP`，脚本会弹出文件选择框。
-
-安装完成后，请立即从 Battle.net 点“进入游戏”，然后打开：
+1. 打开 `HsMod macOS Installer.app`
+2. 在 `HsMod` 里选择 HsMod 源码目录或源码 zip
+3. 在 `BepInEx` 里选择 BepInEx macOS universal zip
+4. 在 `Hearthstone` 里选择 `Hearthstone.app`，或者选择 `/Applications/Hearthstone` 文件夹
+5. 点击 `Install`
+6. 安装完成后，安装器会打开 Battle.net；从 Battle.net 点“进入游戏”
+7. 游戏进入后打开：
 
 ```text
 http://127.0.0.1:58744/pack
 ```
 
-如果 Battle.net 后台校验后恢复了官方启动文件，HsMod 会失效。退出炉石后运行：
+如果炉石更新或 Battle.net 校验后 HsMod 失效，退出炉石，重新打开安装器，点 `Re-inject`，然后马上从 Battle.net 启动游戏。
+
+### 安装器会做什么
+
+- 给 HsMod 源码应用 `patches/hsmod-macos-compat.patch`
+- 在 macOS 上构建 patched `HsMod.dll`
+- 解压 BepInEx 到炉石目录
+- 安装 `BepInEx/plugins/HsMod.dll`
+- 安装 HsMod 需要的 `unstripped_corlib`
+- 保存原始炉石二进制为 `Hearthstone.real`
+- 用签名后的 x86_64 launcher wrapper 替换炉石启动文件
+- 重新签名 `Hearthstone.app`
+
+### 兼容改动
+
+HsMod 构建侧：
+
+- 添加 .NET Framework 4.8 reference assemblies，方便在 macOS 用 `dotnet build`
+- 禁用 Windows-only `install.bat` post-build
+- 修正当前 macOS 构建/运行环境里不兼容的 C# API 用法
+- 移除缺失的 `QRCoderUnity` 引用
+- 将 HsMod WebServer 绑定到 `127.0.0.1`
+
+macOS 启动侧：
+
+- 保留 Battle.net 启动时传入的登录参数
+- 使用 x86_64 wrapper 进入 Rosetta 路径
+- 通过 Doorstop/BepInEx 加载 HsMod
+
+`arm64e` Doorstop 可以进入预加载阶段，但 BepInEx 5 / MonoMod.RuntimeDetour 在这个路径下会失败。当前可用方案是 x86_64 wrapper + Rosetta。
+
+### 从源码构建安装器
 
 ```sh
-./scripts/watch_current_install.sh
+git clone https://github.com/DongLinghe/hsmod-macos-installer.git
+cd hsmod-macos-installer
+./scripts/build_installer_app.sh
 ```
 
-然后在 Battle.net 点“进入游戏”。这个脚本会在等待启动时自动把 wrapper 放回当前炉石版本。
-
-### 只构建 HsMod.dll
-
-如果只想把 HsMod 源码打补丁并编译出 DLL：
-
-```sh
-./scripts/build_patched_hsmod.sh /path/to/HsMod-bepinex5.zip dist/HsMod.dll
-```
-
-也可以传源码目录：
-
-```sh
-./scripts/build_patched_hsmod.sh /path/to/HsMod dist/HsMod.dll
-```
-
-### 炉石更新后
-
-炉石或 Battle.net 更新后，`Hearthstone.app` 可能会被恢复成原版。重新运行安装脚本即可：
-
-```sh
-HSMOD_SOURCE=../HsMod \
-BEPINEX_ZIP=/path/to/BepInEx_macos_universal_5.4.23.5.zip \
-./scripts/install_from_archives.sh
-```
-
-如果你已经安装成功过，也可以生成本机快捷工具：
-
-```sh
-./scripts/build_app_from_current_install.sh
-```
-
-生成位置：
+输出：
 
 ```text
-dist/HsMod macOS Helper.app
+dist/HsMod macOS Installer.app
 ```
 
-之后炉石更新或 Battle.net 恢复启动文件导致 HsMod 失效时，退出炉石，双击这个 app 恢复当前机器上的安装，然后立即从 Battle.net 启动游戏。
-
-已经完整安装过一次后，也可以只快速恢复当前启动文件：
+打包 Release zip：
 
 ```sh
-./scripts/reinject_current_install.sh
+./scripts/package_release.sh
 ```
 
-### 恢复原版启动文件
+输出：
 
-如果要移除 launcher wrapper：
-
-```sh
-"dist/HsMod macOS Helper.app/Contents/Resources/restore_original_hearthstone.sh"
+```text
+dist/HsMod-macOS-Installer.zip
 ```
 
-### 日志
+### 日志和恢复
+
+安装日志：
 
 ```text
 ~/Library/Logs/HsModMacOSHelper.log
 ```
 
-### 做了哪些兼容处理
-
-HsMod 构建补丁：
-
-- 添加 .NET Framework 4.8 reference assemblies
-- 禁用 Windows `install.bat` post-build
-- 修正 macOS 构建环境下不兼容的 C# API 用法
-- 移除缺失的 `QRCoderUnity` 引用
-- 将 HsMod WebServer 绑定到 `127.0.0.1`
-
-完整补丁文件：
+安装器会在炉石目录创建备份：
 
 ```text
-patches/hsmod-macos-compat.patch
+/Applications/Hearthstone/HsModBackups
 ```
 
-macOS 启动链路：
+恢复原版启动文件：
 
-- 安装 BepInEx 5 到炉石目录
-- 安装 patched `HsMod.dll`
-- 安装 `unstripped_corlib`
-- 保存原始炉石二进制为 `Hearthstone.real`
-- 使用已签名 x86_64 launcher wrapper 启动原始游戏
-- 从 Battle.net 启动时保留登录 token 传递
-
-`arm64e` Doorstop 可以编译，但 BepInEx 5 / MonoMod.RuntimeDetour 在 arm64e 预加载阶段失败。当前可用方案使用 Rosetta/x86_64 wrapper。
-
-Battle.net/Agent 可能会在更新或版本校验后恢复官方启动文件；这是当前方案需要在启动前重新注入 wrapper 的原因。
+```sh
+./scripts/restore_original_hearthstone.sh /Applications/Hearthstone/Hearthstone.app
+```
 
 ### 上游项目
 
@@ -168,179 +129,129 @@ Battle.net/Agent 可能会在更新或版本校验后恢复官方启动文件；
 - BepInEx: https://github.com/BepInEx/BepInEx
 - UnityDoorstop: https://github.com/NeighTools/UnityDoorstop
 
-### 注意
-
-这个项目会修改本机的 `Hearthstone.app` 启动文件，并在炉石目录下创建备份。使用前请退出炉石。
-
 ## English
 
-Run [HsMod](https://github.com/Pik-4/HsMod) on Apple Silicon macOS Hearthstone.
+A GUI installer for running HsMod on Apple Silicon macOS Hearthstone.
 
-This project provides:
+The upstream HsMod package is primarily arranged for the Windows/BepInEx flow. On macOS Hearthstone, direct installation hits Doorstop architecture issues, BepInEx preload issues, .NET Framework build friction, and Battle.net executable restoration. This project ships macOS compatibility patches, a launch wrapper, and a `.app` installer so HsMod can run on Apple Silicon Macs through Rosetta.
 
-- macOS compatibility patches for HsMod
-- a script for building a patched `HsMod.dll`
-- a BepInEx/HsMod installer script
-- a macOS launcher wrapper that can be re-applied before Battle.net launch
-- an optional helper app for restoring the setup after Hearthstone updates
+### Download
 
-### Requirements
+Download this file from GitHub Releases:
 
-- Apple Silicon Mac
-- macOS with Rosetta 2
-- macOS Hearthstone
-- BepInEx 5 macOS universal package
-- HsMod source tree or source zip
+```text
+HsMod-macOS-Installer.zip
+```
 
-Tested with:
+Unzip it and open:
 
-- macOS 27.0 beta
-- Hearthstone `36.0`
-- BepInEx `5.4.23.5`
-- HsMod `11.3.0.2`
+```text
+HsMod macOS Installer.app
+```
 
 ### Files You Need
 
-- HsMod source directory, or `HsMod-bepinex5.zip`
-- `BepInEx_macos_universal_5.4.23.5.zip`
-- Hearthstone installed at the default path:
+- HsMod source directory, or a source zip such as `HsMod-bepinex5.zip`
+- BepInEx 5 macOS universal zip, such as `BepInEx_macos_universal_5.4.23.5.zip`
+- macOS Hearthstone, usually installed at:
 
 ```text
 /Applications/Hearthstone/Hearthstone.app
 ```
 
-### Install
+### Usage
 
-Clone both repositories:
-
-```sh
-git clone https://github.com/DongLinghe/hsmod-macos-compat.git
-git clone https://github.com/Pik-4/HsMod.git
-cd hsmod-macos-compat
-```
-
-Run the installer:
-
-```sh
-HSMOD_SOURCE=../HsMod \
-BEPINEX_ZIP=/path/to/BepInEx_macos_universal_5.4.23.5.zip \
-./scripts/install_from_archives.sh
-```
-
-If `HSMOD_SOURCE` and `BEPINEX_ZIP` are omitted, the script opens file pickers.
-
-After installation, immediately launch Hearthstone from Battle.net and open:
+1. Open `HsMod macOS Installer.app`
+2. Select the HsMod source directory or source zip
+3. Select the BepInEx macOS universal zip
+4. Select `Hearthstone.app`, or the `/Applications/Hearthstone` folder
+5. Click `Install`
+6. When installation finishes, the installer opens Battle.net; launch Hearthstone from Battle.net
+7. After the game starts, open:
 
 ```text
 http://127.0.0.1:58744/pack
 ```
 
-If Battle.net restores the official executable during version checks, HsMod will stop loading. Quit Hearthstone, then run:
+If Hearthstone updates or Battle.net restores the official executable, quit Hearthstone, open the installer again, click `Re-inject`, then launch the game from Battle.net immediately.
+
+### What The Installer Does
+
+- Applies `patches/hsmod-macos-compat.patch` to the HsMod source
+- Builds a patched `HsMod.dll` on macOS
+- Extracts BepInEx into the Hearthstone directory
+- Installs `BepInEx/plugins/HsMod.dll`
+- Installs the `unstripped_corlib` files required by HsMod
+- Saves the original Hearthstone binary as `Hearthstone.real`
+- Replaces the Hearthstone executable with a signed x86_64 launcher wrapper
+- Re-signs `Hearthstone.app`
+
+### Compatibility Changes
+
+HsMod build changes:
+
+- Add .NET Framework 4.8 reference assemblies for `dotnet build` on macOS
+- Disable the Windows-only `install.bat` post-build step
+- Adjust C# API usage that fails in the tested macOS build/runtime path
+- Remove a missing `QRCoderUnity` reference
+- Bind the HsMod WebServer to `127.0.0.1`
+
+macOS launch changes:
+
+- Preserve Battle.net launch/login arguments
+- Use an x86_64 wrapper to enter the Rosetta path
+- Load HsMod through Doorstop/BepInEx
+
+An `arm64e` Doorstop path can reach the preload stage, but BepInEx 5 / MonoMod.RuntimeDetour fails there. The working path is x86_64 wrapper + Rosetta.
+
+### Build From Source
 
 ```sh
-./scripts/watch_current_install.sh
-```
-
-Click Play in Battle.net while the watcher is running. It re-applies the wrapper if Battle.net restores the executable before launch.
-
-### Build HsMod.dll Only
-
-Build a patched DLL from a source zip:
-
-```sh
-./scripts/build_patched_hsmod.sh /path/to/HsMod-bepinex5.zip dist/HsMod.dll
-```
-
-Or from a source directory:
-
-```sh
-./scripts/build_patched_hsmod.sh /path/to/HsMod dist/HsMod.dll
-```
-
-### After Hearthstone Updates
-
-Hearthstone or Battle.net updates may restore the original `Hearthstone.app`.
-Run the installer again:
-
-```sh
-HSMOD_SOURCE=../HsMod \
-BEPINEX_ZIP=/path/to/BepInEx_macos_universal_5.4.23.5.zip \
-./scripts/install_from_archives.sh
-```
-
-You can also build a local helper app after a successful install:
-
-```sh
-./scripts/build_app_from_current_install.sh
+git clone https://github.com/DongLinghe/hsmod-macos-installer.git
+cd hsmod-macos-installer
+./scripts/build_installer_app.sh
 ```
 
 Output:
 
 ```text
-dist/HsMod macOS Helper.app
+dist/HsMod macOS Installer.app
 ```
 
-When an update breaks the setup, quit Hearthstone and run this helper app to
-restore the current machine's installation, then immediately launch from Battle.net.
-
-After a full install has succeeded once, you can also quickly restore the
-launcher wrapper:
+Package the release zip:
 
 ```sh
-./scripts/reinject_current_install.sh
+./scripts/package_release.sh
 ```
 
-### Restore Original Launcher
+Output:
 
-```sh
-"dist/HsMod macOS Helper.app/Contents/Resources/restore_original_hearthstone.sh"
+```text
+dist/HsMod-macOS-Installer.zip
 ```
 
-### Logs
+### Logs And Recovery
+
+Install log:
 
 ```text
 ~/Library/Logs/HsModMacOSHelper.log
 ```
 
-### Compatibility Changes
-
-HsMod build patch:
-
-- adds .NET Framework 4.8 reference assemblies
-- disables the Windows `install.bat` post-build step
-- fixes C# API usage that fails in the macOS build environment
-- removes the missing `QRCoderUnity` reference
-- binds the HsMod WebServer to `127.0.0.1`
-
-Patch file:
+Backups are created under:
 
 ```text
-patches/hsmod-macos-compat.patch
+/Applications/Hearthstone/HsModBackups
 ```
 
-macOS launch flow:
+Restore the original launcher:
 
-- installs BepInEx 5 into the Hearthstone directory
-- installs the patched `HsMod.dll`
-- installs `unstripped_corlib`
-- saves the original Hearthstone binary as `Hearthstone.real`
-- launches the original game through a signed x86_64 wrapper
-- keeps Battle.net login token handoff working when launched from Battle.net
-
-An `arm64e` Doorstop build can be produced, but BepInEx 5 /
-MonoMod.RuntimeDetour fails during arm64e preloading. The working path uses a
-Rosetta/x86_64 wrapper.
-
-Battle.net/Agent may restore the official executable after updates or version
-checks. This is why the wrapper may need to be re-applied before launch.
+```sh
+./scripts/restore_original_hearthstone.sh /Applications/Hearthstone/Hearthstone.app
+```
 
 ### Upstream Projects
 
 - HsMod: https://github.com/Pik-4/HsMod
 - BepInEx: https://github.com/BepInEx/BepInEx
 - UnityDoorstop: https://github.com/NeighTools/UnityDoorstop
-
-### Note
-
-This project modifies the local `Hearthstone.app` launcher and creates backups
-in the Hearthstone directory. Quit Hearthstone before running the installer.

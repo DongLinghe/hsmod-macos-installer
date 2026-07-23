@@ -42,7 +42,7 @@ elif [ ! -e "$REAL_PATH" ]; then
     fail "current executable looks like a wrapper but $REAL_PATH does not exist"
 fi
 
-clang -arch x86_64 -Os "-DHSMOD_REAL_GAME=\"$REAL_PATH\"" "$ROOT_DIR/src/HsModLauncher.c" -o "$EXE_PATH"
+clang -arch x86_64 -mmacosx-version-min=11.0 -Os "-DHSMOD_REAL_GAME=\"$REAL_PATH\"" "$ROOT_DIR/src/HsModLauncher.c" -o "$EXE_PATH"
 chmod +x "$EXE_PATH" "$REAL_PATH"
 xattr -cr "$HEARTHSTONE_APP"
 codesign -f -s - "$ROOT/libdoorstop.dylib" >/dev/null
